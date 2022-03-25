@@ -1,45 +1,3 @@
-"""
-############# 使用说明 #############
-
-# 配置文件示例如下
-[DEFAULT]
-timezone = Asia/Shanghai
-
-[System]
-name = test
-idle_seconds = 60
-debug = true
-step = 0.1
-
-# 自定义Section类，如下
-from simple_settings import BaseSection
-
-class DEFAULT(BaseSection):
-    timezone: str
-
-
-class System(BaseSection):
-    idle_seconds: int
-    debug: bool
-    step: float
-
-# 说明：类名对应配置文件的section名，类注解对应option，
-# 注解目前支持固定的类型，str, int, float, bool, list
-
-# 继承并构建配置类
-from simple_settings.core import BaseSettings
-
-class MySettings(BaseSettings):
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings_sample.ini')
-    default = DEFAULT()
-    system = System()
-
-# 在项目中使用
-my_settings = MySettings()
-my_settings.default.timezone
-my_settings.system.step
-
-"""
 import os
 from configparser import NoOptionError, ConfigParser
 
@@ -61,11 +19,12 @@ class BaseSection(object):
     _parser = None
     allow_undefined_options = True
 
-    def __init__(self, allow_undefined):
+    def __init__(self, allow_undefined=None):
         """
         allow_undefined: 是否允许读取未定义配置项（如果存在，默认转为字符串）
         """
-        self.allow_undefined_options = allow_undefined
+        if allow_undefined is not None:
+            self.allow_undefined_options = allow_undefined
 
     def __getattr__(self, item):
         """
