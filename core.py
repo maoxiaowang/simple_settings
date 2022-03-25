@@ -55,20 +55,10 @@ class BaseSection(object):
         return super().__getattribute__(item)
 
     def __getattribute__(self, item):
-        """
-        section属性有赋值
-        """
         if item.startswith('_'):
             # 以下划线开头的属性直接返回
             return object.__getattribute__(self, item)
-        try:
-            section_name = self.__class__.__name__
-            value = self._parser.get(section_name, item)
-        except NoOptionError:
-            # 配置文件中没有配置，返回默认值
-            return item
-        else:
-            return value
+        return self.__getattr__(item)
 
     def __new__(cls, *args, **kwargs):
         """
