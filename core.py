@@ -4,6 +4,18 @@ from configparser import NoOptionError, ConfigParser
 from utils import str2bool
 
 
+class BaseConverter:
+
+    def to_python(self, value):
+        raise NotImplementedError
+
+
+class BoolConverter(BaseConverter):
+
+    def to_python(self, value):
+        return str2bool(value)
+
+
 class BaseSection(object):
     """
     配置文件里section的名字要与类名一致
@@ -23,6 +35,7 @@ class BaseSection(object):
         """
         allow_undefined: 是否允许读取未定义配置项（如果存在，默认转为字符串）
         """
+        self._section_name = self.__class__.__name__
         if allow_undefined is not None:
             self.allow_undefined_options = allow_undefined
 
@@ -91,7 +104,7 @@ class BaseSettings(object):
     def __new__(cls, *args, **kwargs):
         assert cls.path is not None, "The attribute 'path' must be given."
         if not os.path.exists(cls.path):
-            raise AttributeError(f'The path {cls.path} does not exist.')
+            raise AttributeError(f"The path {cls.path} does not exist.")
         parser = ConfigParser()
         parser.read(cls.path)
         dicts = filter(
