@@ -26,7 +26,7 @@ class DEFAULT(BaseSection):
 class System(BaseSection):
     # name: str  # allow_undefined为True时，str类型可以不定义
     idle_seconds: int
-    debug: bool = False  # 支持默认值
+    debug: bool
     step: float
 ```
 
@@ -40,7 +40,7 @@ from simple_settings.core import BaseSettings
 class MySettings(BaseSettings):
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings_sample.ini')
     default = DEFAULT()
-    system = System(allow_undefined=True)
+    system = System(allow_undefined=False)  # 不允许配置文件里没有的选项
 ```
 
 ### 在项目中使用

@@ -39,42 +39,31 @@ class BaseSection(object):
         if allow_undefined is not None:
             self.allow_undefined_options = allow_undefined
 
-    def __getattr__(self, key, value):
+    def __getattr__(self, key):
         """
-        未定义的属性通过注解类型获取配置的值
+        通过注解类型获取配置的值
         """
         options = self.__annotations__
         option_keys = options.keys()
+        section_name = self.__class__.__name__
         if key not in option_keys:
             if self.allow_undefined_options:
                 # build undefined option
                 options[key] = str
             else:
-                raise AttributeError(
-                    "No option '%s' defined in section %s." % (key, self._section_name)
-                )
-        for option, type_val in options.items():
+                raise AttributeError("No option '%s' defined in section %s." % (key, section_name))
+        for option, a_type in options.items():
             if key == option:
-                if type_val is bool:
-                    value = str2bool(value)
-                if type_val is list:
-                    value = value.split(',')
+                try:
+                    value = self._parser.get(section_name, option)
+                except Exception as e:
+                    raise e
+                if a_type is bool:
+                    return str2bool(value)
                 if value is None:
-                    value = value
-                value = type_val.__call__(value)
-        return value
-
-    def __getattribute__(self, key):
-        if key.startswith('_'):
-            # 以下划线开头的属性直接返回
-            return object.__getattribute__(self, key)
-        try:
-            value = self._parser.get(self._section_name, key)
-        except NoOptionError:
-            # 无法获取到配置，尝试返回属性默认值
-            return object.__getattribute__(self, key)
-        # 若存在配置，则尝试匹配注解
-        return self.__getattr__(key, value)
+                    return value
+                return a_type.__call__(value)
+        return super().__getattribute__(key)
 
     def __new__(cls, *args, **kwargs):
         """
@@ -95,7 +84,7 @@ class BaseSection(object):
         return _super_new(cls)
 
     def __repr__(self):
-        return '<%s settings object>' % self.__class__.__name__
+        return '<%s section object>' % self.__class__.__name__
 
 
 class BaseSettings(object):
