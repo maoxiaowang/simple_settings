@@ -22,7 +22,16 @@ class MySettings(BaseSettings):
 
 my_settings = MySettings()
 
+# 调用1
 print(my_settings.default.timezone)
-print(my_settings.system.name)
-print(my_settings.system.step)
 
+# 调用2
+default = my_settings.default
+print(default.timezone)
+
+# 某个section所有配置
+print(my_settings.system.__dict__())
+
+# 所有的配置
+for item in my_settings:
+    print(item)
